@@ -1,0 +1,29 @@
+name: 校验行业调研分析Skill
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: anqian-dongcha-baogao/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 安装Node依赖
+        working-directory: anqian-dongcha-baogao
+        run: npm ci
+      - name: 运行构建测试
+        working-directory: anqian-dongcha-baogao
+        run: npm test
+      - name: 检查Python脚本
+        run: python -m py_compile scripts/安装Skill.py scripts/校验公开仓库.py anqian-dongcha-baogao/scripts/检查PDF.py
+      - name: 检查公开仓库
+        run: python scripts/校验公开仓库.py

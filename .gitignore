@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+验收/
+交付/
+测试输出/

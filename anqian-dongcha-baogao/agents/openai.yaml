@@ -1,0 +1,4 @@
+interface:
+  display_name: "行业调研分析"
+  short_description: "快消食品行业研究、客户案前洞察与图表报告，保留证据和判断边界"
+  default_prompt: "请使用 $anqian-dongcha-baogao 开展行业调研分析，先确认是纯行业研究还是客户案前研究，再形成有证据的商业洞察，并按需制作专业报告。"
