@@ -2,6 +2,8 @@
 
 将下面整段文字原样发给需要执行安装的 Agent。它适用于 Codex、Claude Code、OpenClaw，以及其他支持 Agent Skills 和 MCP 的本地 Agent。
 
+若已经安装过旧版，请改用 [给Agent的旧版升级提示词.md](给Agent的旧版升级提示词.md)。
+
 ---
 
 请帮我从下面的公开 GitHub 仓库安装“行业调研分析”Skill，并完成运行环境与 Tavily MCP 的配置和验收：

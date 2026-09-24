@@ -13,6 +13,7 @@ TEXT_SUFFIXES = {".md", ".py", ".cjs", ".js", ".json", ".yaml", ".yml", ".html",
 REQUIRED = [
     "README.md",
     "给Agent的安装提示词.md",
+    "给Agent的旧版升级提示词.md",
     "安装与MCP配置.md",
     "LICENSE",
     "anqian-dongcha-baogao/SKILL.md",
