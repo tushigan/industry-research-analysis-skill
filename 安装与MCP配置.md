@@ -1,168 +1,39 @@
-# 安装、环境与 MCP 配置
+# 安装与运行检查
 
-## 1. 适用范围
-
-Skill 主体遵循 `SKILL.md` 形式的 Agent Skills 结构。不同 Agent 的技能目录和 MCP 配置并不完全相同，所以“任意 Agent”指支持 Agent Skills 或能加载本地指令包的 Agent；不支持这些能力的平台无法通过复制目录获得同等功能。
-
-## 2. 安装 Skill
-
-### Codex
+此仓库的单一 Skill 名称是 `anqian-dongcha-baogao`。不要同时安装旧版和 `-v2` 别名。下载仓库后在根目录执行：
 
 ```bash
-python3 scripts/安装Skill.py --agent codex --with-runtime
+python3 scripts/安装Skill.py --agent codex
 ```
 
-默认目标：`$CODEX_HOME/skills/anqian-dongcha-baogao`；未设置 `CODEX_HOME` 时使用 `~/.codex/skills/anqian-dongcha-baogao`。
+可把 `codex` 换成 `claude`，或用 `--dest` 指定客户端文档确认的技能根目录。OpenClaw 请使用它的原生 Skill 安装命令；不要猜测共享目录。云端 Agent 必须确认能读取本地目录，不能仅凭文件已复制宣称可用。
 
-### Claude Code
+目标已有同名 Skill 时，安装器默认停止。只有确认替换时才加 `--force`；旧包会移到技能根目录的上一级 `skill-backups/`，不留在技能发现路径中。安装失败会尝试恢复旧包。安装后回读 `VERSION.json`、`SKILL.md` 和脚本，并在新会话确认客户端实际发现了入口。已有本地改动应先单独核对。
+
+## 运行依赖
+
+报告构建使用 Node.js；完整浏览器与 PDF 验收需要 Playwright/Chromium 和 PyMuPDF。随包静态前端依赖离线可用。推荐先执行：
 
 ```bash
-python3 scripts/安装Skill.py --agent claude --with-runtime
+node anqian-dongcha-baogao/scripts/检查运行环境.cjs
 ```
 
-默认目标：`~/.claude/skills/anqian-dongcha-baogao`。Claude Code 官方同时支持项目目录 `.claude/skills/`；如需仅当前项目生效，请使用 `--dest` 指定该目录。
+安装器的 `--with-runtime` 可在 Skill 目录内安装 Playwright `1.62.1`、Chromium 和 PyMuPDF `1.27.2`；需要 Node.js 24+、Python 3.10+、npm 与 pip，并产生网络下载。已有可用依赖时不要重复安装。安装器会打印新建 Python 的位置，后续验收须将 `ANQIAN_PYTHON` 设为该路径；若使用外部 Node 依赖目录，设置 `ANQIAN_NODE_MODULES`。版本以包内 `VERSION.json` 与实际检查输出为准。
 
-### OpenClaw
+## 匿名样本与完整验收
+
+在已安装 Skill 根目录执行，输出放在独立临时目录，不覆盖业务项目：
 
 ```bash
-openclaw skills install ./anqian-dongcha-baogao --global
-openclaw skills info anqian-dongcha-baogao --json
+node scripts/生成演示项目.cjs /临时目录/行业调研样本 deck --attachment
+node scripts/构建报告.cjs --research /临时目录/行业调研样本/研究数据.json --report /临时目录/行业调研样本/报告.json --out /临时目录/行业调研样本/交付
+RUN_DELIVERY_TESTS=1 node --test tests/完整交付.test.cjs
 ```
 
-OpenClaw 当前版本默认安装到活动工作区的 `skills/`；`--global` 表示安装到供本机多个 Agent 使用的共享管理目录。请以 `skills info` 返回的实际位置为准，不要猜测 `~/.openclaw/skills`。原生安装完成后，在实际 Skill 目录内按下文“手动补装”安装运行依赖。
+生成器的样本是内部研究稿，故单独对它运行对客 PDF 验收会被正确阻断。上述端到端测试会在临时目录生成可验收的匿名客户样本，并实际检查浏览器、讲者台、PDF 和成品一致性。`technical_passed` 只表示技术检查，不表示内容、图表比例或业务批准。新完整报告还须执行 `SKILL.md` 指定的图形方案预检和物理页图表占比检查。
 
-### 其他 Agent
+## Tavily MCP
 
-先查该 Agent 的官方文档。如果它支持 Agent Skills，将正式技能根目录传给安装器：
+Tavily 是来源发现工具，不是报告构建的硬依赖。先确认实际客户端能发现 MCP，再确认当前会话能调用搜索工具，最后把关键结论核回官方或一手原文。优先使用客户端支持的 OAuth；若必须用 API Key，只存入客户端私密凭据或系统钥匙串，不写进仓库、提示词、截图和日志。
 
-```bash
-python3 scripts/安装Skill.py --dest /正式技能根目录 --with-runtime
-```
-
-不要仅凭目录名猜测。云端 Agent 可能无法读取本机个人技能目录，此时应安装为项目级 Skill，或使用平台提供的上传/同步能力。
-
-## 3. 运行环境
-
-### 最低要求
-
-- Node.js 20+
-- Python 3.10+
-- Git 2.30+（从 GitHub 克隆时需要）
-
-`--with-runtime` 会在安装后的 Skill 目录内执行：
-
-1. `npm install`
-2. `npx playwright install chromium`
-3. 创建 `.venv`
-4. 安装 `requirements.txt` 中的 PDF 检查依赖
-
-这些依赖只写入 Skill 目录，不修改业务项目。
-
-### 手动补装
-
-```bash
-cd /已安装的/anqian-dongcha-baogao
-npm install
-npx playwright install chromium
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-```
-
-Windows 的虚拟环境解释器通常位于 `.venv\Scripts\python.exe`。
-
-## 4. Tavily MCP
-
-网络研究优先使用 Tavily。先检查当前 Agent 是否已经提供同名工具，避免重复注册。
-
-### 推荐：Remote MCP + OAuth
-
-官方远程地址：
-
-```text
-https://mcp.tavily.com/mcp
-```
-
-该地址不包含密钥。客户端支持 OAuth 时优先采用这种方式。
-
-#### Codex
-
-```bash
-codex mcp add tavily --url https://mcp.tavily.com/mcp
-codex mcp login tavily
-codex mcp get tavily
-```
-
-若已经存在 `tavily`，先执行 `codex mcp get tavily`，确认现有配置后再决定是否更新，避免创建重复条目。
-
-#### Claude Code
-
-```bash
-claude mcp add --transport http --scope user tavily https://mcp.tavily.com/mcp
-```
-
-随后进入 Claude Code，使用 `/mcp` 选择 Tavily 并完成 OAuth 授权。
-
-#### 支持通用 MCP JSON 的客户端
-
-根据客户端官方格式配置远程 MCP。需要通过 stdio 桥接时，可采用 Tavily 官方示例使用的 `mcp-remote`：
-
-```json
-{
-  "mcpServers": {
-    "tavily": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.tavily.com/mcp"]
-    }
-  }
-}
-```
-
-不同客户端对环境变量插值、OAuth 和配置文件位置的支持不同，必须以该客户端当前官方文档为准。
-
-### 备选：本地 MCP + API Key
-
-仅在 OAuth 不可用时采用。Tavily 官方本地服务要求 Node.js 20+，启动命令为：
-
-```bash
-npx -y tavily-mcp@latest
-```
-
-密钥变量名为 `TAVILY_API_KEY`。应通过客户端的私密凭据界面、操作系统钥匙串或不进入版本控制的本机环境设置提供；不要把真实值写入仓库、公开 JSON、聊天记录或截图。
-
-## 5. 验收
-
-### Skill 文件与单元测试
-
-```bash
-test -f /技能根目录/anqian-dongcha-baogao/SKILL.md
-cd /技能根目录/anqian-dongcha-baogao
-npm test
-```
-
-### 技术样本
-
-在临时空目录执行，不能覆盖真实研究项目：
-
-```bash
-node scripts/测试样本.cjs /tmp/行业调研分析测试
-node scripts/构建报告.cjs /tmp/行业调研分析测试
-node scripts/验收报告.cjs /tmp/行业调研分析测试
-.venv/bin/python scripts/检查PDF.py /tmp/行业调研分析测试
-```
-
-Windows 请把 `/tmp/行业调研分析测试` 改为系统临时目录，并使用 `.venv\Scripts\python.exe`。
-
-### Tavily 三级验收
-
-1. **配置层**：MCP 列表存在且启用 `tavily`。
-2. **协议层**：能发现 Tavily Search、Extract 等工具。
-3. **请求层**：执行一次真实搜索并获得标题、链接与摘要。
-
-只有三级都通过，才能称 Tavily 已可用。部分 Agent 需要重启或新开会话才能重新加载 MCP 和 Skill。
-
-## 6. 官方参考
-
-- [Tavily MCP 官方仓库](https://github.com/tavily-ai/tavily-mcp)
-- [Claude Code Skills 官方文档](https://code.claude.com/docs/en/skills)
-- [OpenClaw Skills 官方文档](https://docs.openclaw.ai/cli/skills)
-- [Agent Skills 开放标准](https://agentskills.io/)
+本安装操作不授权上传客户资料、对外发送、购买付费数据或修改外部权限。详见 [包内运行和迁移说明](anqian-dongcha-baogao/安装与MCP配置.md)。

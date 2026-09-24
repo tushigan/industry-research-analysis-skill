@@ -9,6 +9,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+from datetime import datetime
 
 
 SKILL_NAME = "anqian-dongcha-baogao"
@@ -36,12 +37,12 @@ def install_runtime(target: Path) -> None:
     node = shutil.which("node")
     npm = shutil.which("npm")
     if not node or not npm:
-        raise RuntimeError("未找到 Node.js/npm。请先安装 Node.js 20 或更高版本。")
+        raise RuntimeError("未找到 Node.js/npm。请先安装 Node.js 24 或更高版本。")
     major = int(subprocess.check_output([node, "-p", "process.versions.node.split('.')[0]"], text=True).strip())
-    if major < 20:
-        raise RuntimeError(f"Node.js 版本过低：{major}，需要 20 或更高版本。")
+    if major < 24:
+        raise RuntimeError(f"Node.js 版本过低：{major}，需要 24 或更高版本。")
 
-    run([npm, "install", "--no-audit", "--no-fund"], target)
+    run([npm, "install", "--no-save", "--no-package-lock", "--no-audit", "--no-fund", "playwright@1.62.1"], target)
     npx = shutil.which("npx")
     if not npx:
         raise RuntimeError("未找到 npx，无法安装 Playwright Chromium。")
@@ -53,7 +54,10 @@ def install_runtime(target: Path) -> None:
     venv = target / ".venv"
     run([python, "-m", "venv", str(venv)], target)
     venv_python = venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-    run([str(venv_python), "-m", "pip", "install", "--disable-pip-version-check", "-r", "requirements.txt"], target)
+    run([str(venv_python), "-m", "pip", "install", "--disable-pip-version-check", "pymupdf==1.27.2"], target)
+    env = os.environ.copy()
+    env["ANQIAN_PYTHON"] = str(venv_python)
+    subprocess.run([node, "scripts/检查运行环境.cjs"], cwd=target, env=env, check=True)
 
 
 def main() -> int:
@@ -61,7 +65,7 @@ def main() -> int:
     parser.add_argument("--agent", choices=["codex", "claude", "project"], help="目标 Agent")
     parser.add_argument("--dest", type=Path, help="目标 Skills 根目录；指定后覆盖 --agent 的默认目录")
     parser.add_argument("--with-runtime", action="store_true", help="在 Skill 目录内安装 Node、浏览器和 Python 依赖")
-    parser.add_argument("--force", action="store_true", help="删除并更新已存在的同名 Skill；请先自行备份")
+    parser.add_argument("--force", action="store_true", help="先备份旧 Skill，再更新同名入口")
     args = parser.parse_args()
 
     if not SOURCE.is_dir() or not (SOURCE / "SKILL.md").is_file():
@@ -73,23 +77,38 @@ def main() -> int:
     target = destination_root / SKILL_NAME
     destination_root.mkdir(parents=True, exist_ok=True)
 
+    backup = None
     if target.exists():
         if not args.force:
             raise RuntimeError(f"目标已存在：{target}\n请先备份并比较；确认更新后再使用 --force。")
-        shutil.rmtree(target)
+        backup_root = destination_root.parent / "skill-backups"
+        backup_root.mkdir(parents=True, exist_ok=True)
+        backup = backup_root / f"{SKILL_NAME}-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}"
+        shutil.move(str(target), str(backup))
+        print(f"旧版本已备份：{backup}")
 
-    shutil.copytree(
-        SOURCE,
-        target,
-        ignore=shutil.ignore_patterns("node_modules", ".venv", "__pycache__", ".DS_Store"),
-    )
-    print(f"Skill 已安装：{target}")
+    try:
+        shutil.copytree(
+            SOURCE,
+            target,
+            ignore=shutil.ignore_patterns("node_modules", ".venv", "__pycache__", ".DS_Store"),
+        )
+        print(f"Skill 已安装：{target}")
 
-    if args.with_runtime:
-        install_runtime(target)
-        print("运行依赖已安装并隔离在 Skill 目录内。")
-    else:
-        print("未安装可选运行依赖；需要完整报告验收时请重新执行并加 --with-runtime。")
+        if args.with_runtime:
+            install_runtime(target)
+            print("运行依赖已安装并隔离在 Skill 目录内。")
+            python_path = target / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+            print(f"后续验收请设置 ANQIAN_PYTHON={python_path}")
+        else:
+            print("未安装浏览器与 PDF 验收依赖；完整报告验收前需配置运行时。")
+    except Exception:
+        if target.exists():
+            shutil.rmtree(target)
+        if backup is not None:
+            shutil.move(str(backup), str(target))
+            print(f"安装失败，已恢复旧版本：{target}", file=sys.stderr)
+        raise
 
     print("下一步：按仓库的《安装与MCP配置.md》配置 Tavily，并在新会话中验证 Skill 是否被发现。")
     return 0

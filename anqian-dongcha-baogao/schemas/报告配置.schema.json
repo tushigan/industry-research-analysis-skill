@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/anqian-dongcha-baogao-v2/报告配置.schema.json",
+  "title": "行业调研分析报告配置",
+  "type": "object",
+  "additionalProperties": false,
+  "allOf": [{ "oneOf": [
+    { "properties": { "page_mode": { "const": "landscape_16_9" } } },
+    { "properties": { "page_mode": { "const": "a4_portrait" }, "presentation_style": { "enum": [] } } }
+  ] }],
+  "required": [
+    "schema_version",
+    "report_config_id",
+    "project_id",
+    "report_type",
+    "page_mode",
+    "production_mode",
+    "delivery_scope",
+    "audience",
+    "working_judgment",
+    "pages",
+    "attachments"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "report_config_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "consulting_deck",
+        "long_report",
+        "survey_report",
+        "research_report"
+      ]
+    },
+    "page_mode": {
+      "type": "string",
+      "enum": [
+        "landscape_16_9",
+        "a4_portrait"
+      ]
+    },
+    "audience": {
+      "type": "string",
+      "minLength": 1
+    },
+    "working_judgment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "page_budget": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "presentation_style": { "type": "string", "enum": ["visual"] },
+    "delivery_scope": { "type": "string", "enum": ["complete", "preview"] },
+    "production_mode": { "type": "string", "enum": ["new_report", "content_revision", "pure_conversion", "historical_replay"] },
+    "audience_mode": { "type": "string", "enum": ["client", "internal"] },
+    "toc": { "type": "boolean" },
+    "pages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/page"
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      }
+    }
+  },
+  "$defs": {
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        { "properties": { "chart": { "enum": [] }, "charts": { "enum": [] } } },
+        { "required": ["chart"], "properties": { "charts": { "enum": [] } } },
+        { "required": ["charts"], "properties": { "chart": { "enum": [] } } }
+      ],
+      "required": [
+        "page_id",
+        "storyline_page_id",
+        "title",
+        "content_mode",
+        "source_ids",
+        "speaker_notes"
+      ],
+      "properties": {
+        "page_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "storyline_page_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_mode": {
+          "type": "string",
+          "enum": [
+            "cover",
+            "insight",
+            "comparison_matrix",
+            "chart",
+            "method",
+            "limitation",
+            "appendix"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "uniqueItems": true
+        },
+        "speaker_notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] },
+        "visual_layout": { "type": "string", "enum": ["comparison", "steps", "matrix", "split", "charts", "diagram"] },
+        "fact_nature": { "type": "string", "enum": ["client_statement", "external_fact", "research_judgment", "working_hypothesis", "recommendation"] },
+        "sourceNote": { "type": "string" },
+        "limitations": { "type": "string" },
+        "chart": { "$ref": "#/$defs/chart" },
+        "charts": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "#/$defs/chart" } },
+        "diagram": { "$ref": "#/$defs/diagram" },
+        "table": { "$ref": "#/$defs/table" },
+        "image": { "$ref": "#/$defs/image" },
+        "statistic": { "$ref": "#/$defs/statistic" }
+      }
+    },
+    "attachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attachment_id",
+        "path", "title", "page_count", "referenced_pages", "format",
+        "share_approved",
+        "share_basis"
+      ],
+      "properties": {
+        "attachment_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "share_approved": {
+          "type": "boolean"
+        },
+        "share_basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "page_count": { "type": "integer", "minimum": 1 },
+        "referenced_pages": { "type": "array", "uniqueItems": true, "items": { "type": "integer", "minimum": 1 } },
+        "format": { "type": "string", "const": "pdf" },
+        "source_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$" }
+      }
+    },
+    "chart": {
+      "type": "object", "additionalProperties": false,
+      "required": ["type", "labels", "unit", "evidence_ids"],
+      "oneOf": [
+        { "required": ["values"], "properties": {
+          "type": { "enum": ["bar", "line", "pie"] }, "values": { "$ref": "#/$defs/chartNumbers" },
+          "evidence_ids": { "uniqueItems": true },
+          "series": { "enum": [] }, "x_unit": { "enum": [] }, "x_evidence_ids": { "enum": [] }
+        } },
+        { "required": ["series"], "properties": {
+          "type": { "enum": ["bar", "line"] }, "evidence_ids": { "uniqueItems": true },
+          "values": { "enum": [] }, "x_unit": { "enum": [] }, "x_evidence_ids": { "enum": [] }
+        } },
+        { "required": ["values", "x_unit", "x_evidence_ids"], "properties": {
+          "type": { "const": "scatter" }, "series": { "enum": [] },
+          "values": { "type": "array", "minItems": 1, "maxItems": 40,
+            "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number" } } }
+        } }
+      ],
+      "properties": {
+        "type": { "type": "string", "enum": ["bar", "line", "pie", "scatter"] },
+        "title": { "type": "string", "minLength": 1, "pattern": "\\S" },
+        "labels": { "type": "array", "minItems": 1, "maxItems": 40,
+          "items": { "type": "string", "minLength": 1, "maxLength": 80, "pattern": "\\S" } },
+        "values": { "type": "array", "minItems": 1, "maxItems": 40 },
+        "series": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/chartSeries" } },
+        "unit": { "$ref": "#/$defs/chartUnit" },
+        "x_unit": { "$ref": "#/$defs/chartUnit" },
+        "evidence_ids": { "$ref": "#/$defs/chartEvidence" },
+        "x_evidence_ids": { "$ref": "#/$defs/chartEvidence" }
+      }
+    },
+    "chartNumbers": { "type": "array", "minItems": 1, "maxItems": 40, "items": { "type": "number" } },
+    "chartUnit": { "type": "string", "minLength": 1, "maxLength": 40, "pattern": "\\S" },
+    "chartEvidence": { "type": "array", "minItems": 1,
+      "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$" } },
+    "chartSeries": {
+      "type": "object", "additionalProperties": false, "required": ["name", "type", "values", "evidence_ids"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 80, "pattern": "\\S" },
+        "type": { "type": "string", "enum": ["bar", "line"] },
+        "values": { "$ref": "#/$defs/chartNumbers" },
+        "evidence_ids": { "$ref": "#/$defs/chartEvidence" }
+      }
+    },
+    "diagram": {
+      "type": "object",
+      "required": ["type", "variant"],
+      "properties": {
+        "type": { "const": "diagram" },
+        "variant": {
+          "type": "string",
+          "enum": ["steps", "comparison", "opportunities", "control-chain", "relationship-map", "categorical-matrix", "equation-flow"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "table": {
+      "type": "object", "additionalProperties": false, "required": ["columns", "rows"],
+      "properties": {
+        "columns": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "rows": { "type": "array", "items": { "type": "array", "items": { "type": ["string", "number", "boolean", "null"] } } }
+      }
+    },
+    "image": {
+      "type": "object", "additionalProperties": false, "required": ["path", "alt"],
+      "properties": { "path": { "type": "string", "minLength": 1 }, "alt": { "type": "string", "minLength": 1 } }
+    },
+    "statistic": {
+      "type": "object", "additionalProperties": false, "required": ["value", "unit", "label", "evidence_ids"],
+      "properties": {
+        "value": { "type": ["number", "string"] },
+        "unit": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "question": { "type": "string" },
+        "sample_size": { "type": "integer", "minimum": 1 },
+        "population": { "type": "string" },
+        "period": { "type": "string" },
+        "limitations": { "type": "string" },
+        "evidence_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$" } }
+      }
+    }
+  }
+}

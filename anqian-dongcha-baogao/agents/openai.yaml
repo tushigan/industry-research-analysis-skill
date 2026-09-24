@@ -1,4 +1,4 @@
 interface:
   display_name: "行业调研分析"
-  short_description: "快消食品行业研究、客户案前洞察与图表报告，保留证据和判断边界"
-  default_prompt: "请使用 $anqian-dongcha-baogao 开展行业调研分析，先确认是纯行业研究还是客户案前研究，再形成有证据的商业洞察，并按需制作专业报告。"
+  short_description: "食品市场研究与证据审校，保留旧版图形混排和附件，生成离线提报、长报告与PDF"
+  default_prompt: "请使用 $anqian-dongcha-baogao 先确认研究问题与资料边界；旧报告默认保真，新研究登记证据并选择合适版式，完整保留内容和图形后分层验收，不把技术通过当作业务批准。"

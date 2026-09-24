@@ -1,0 +1,59 @@
+.ms-diagram{margin:0;min-width:0;align-self:start;color:var(--ink,#203c32);font-family:inherit;letter-spacing:0}
+.ms-diagram *{box-sizing:border-box;min-width:0;letter-spacing:0;overflow-wrap:anywhere}
+.ms-diagram>h2{font-size:18px;line-height:26px;margin:0 0 8px;white-space:break-spaces}
+.ms-diagram .ms-row-label{font-size:17px;line-height:21px;font-weight:650;margin:0;white-space:break-spaces}
+.ms-diagram .ms-detail,.ms-diagram .ms-note{font-size:16px;line-height:20px;margin:0;white-space:break-spaces}
+.ms-matrix{--ms-columns:3}
+.ms-matrix.ms-columns-4{--ms-columns:4}
+.ms-matrix.ms-columns-5{--ms-columns:5}
+.ms-matrix.ms-columns-6{--ms-columns:6}
+.ms-matrix .ms-matrix-head,.ms-matrix .ms-matrix-row{display:grid;grid-template-columns:180px minmax(0,1fr) minmax(0,1.15fr);column-gap:16px;align-items:center}
+.ms-matrix .ms-matrix-head{min-height:40px;padding-bottom:4px;font-size:14px;line-height:18px;color:#52626a}
+.ms-matrix .ms-columns,.ms-matrix .ms-cells{display:grid;grid-template-columns:repeat(var(--ms-columns),minmax(0,1fr));align-items:stretch}
+.ms-matrix .ms-column{text-align:center;padding:0 4px;white-space:break-spaces}
+.ms-matrix .ms-matrix-row{min-height:67px;padding:3px 0;border-top:1px solid var(--line,#d7e1dc)}
+.ms-matrix .ms-cells{align-self:stretch}
+.ms-matrix .ms-cell{display:flex;align-items:center;justify-content:center;border-left:1px solid #e5ebe7;min-height:28px}
+.ms-matrix .ms-cell:last-child{border-right:1px solid #e5ebe7}
+.ms-matrix .ms-mobile-column{display:none}
+.ms-matrix .ms-mark{display:inline-block;flex:none;width:12px;height:12px}
+.ms-matrix .ms-mark-observed{border:6px solid var(--green,#24694d);border-radius:50%}
+.ms-matrix .ms-mark-proposed{width:11px;height:11px;border:2px solid #9a582f;transform:rotate(45deg)}
+.ms-matrix .ms-mark-unknown{width:16px;height:0;border-top:1px solid #66766f}
+.ms-matrix .ms-key{display:flex;flex-wrap:wrap;gap:4px 24px;margin-top:8px;font-size:14px;line-height:20px;color:#52626a}
+.ms-matrix .ms-key-item{display:flex;gap:9px;align-items:center}
+.ms-matrix .ms-key-focus{font-weight:650;color:var(--ink,#203c32)}
+.ms-equation .ms-equation-row{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;padding:6px 0;border-top:1px solid var(--line,#d7e1dc);align-items:center}
+.ms-equation .ms-formula{display:grid;align-items:center;column-gap:12px;font-size:18px;line-height:24px;min-height:58px}
+.ms-equation .ms-divide{grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr)}
+.ms-equation .ms-multiply{grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr) 28px minmax(0,1.18fr)}
+.ms-equation .ms-fraction{display:grid;text-align:center}
+.ms-equation .ms-fraction>.ms-lhs{padding:0 8px 4px;border-bottom:2px solid var(--ink,#203c32)}
+.ms-equation .ms-fraction>.ms-rhs{padding:4px 8px 0}
+.ms-equation .ms-lhs,.ms-equation .ms-rhs,.ms-equation .ms-result{white-space:break-spaces;text-align:center}
+.ms-equation .ms-result{font-weight:650;color:var(--green,#24694d)}
+.ms-equation .ms-times,.ms-equation .ms-equals{display:flex;align-items:center;justify-content:center;text-align:center;font-size:28px;line-height:40px;min-height:40px;color:#9a582f}
+.ms-equation .ms-note{margin-top:4px;color:#52626a}
+.ms-equation .ms-footer{margin-top:8px;padding-top:6px;border-top:1px solid var(--line,#d7e1dc);font-size:14px;line-height:20px;white-space:break-spaces;color:#52626a}
+@media screen and (min-width:1101px) and (max-width:1470px){
+  body:not(.embed) .ms-matrix .ms-matrix-head,body:not(.embed) .ms-matrix .ms-matrix-row{grid-template-columns:160px minmax(0,1fr) minmax(0,1.15fr)}
+  body:not(.embed) .ms-matrix .ms-matrix-row{min-height:87px;padding:8px 0}
+  body:not(.embed) .ms-equation .ms-equation-row{grid-template-columns:160px minmax(0,1fr);padding:12px 0}
+}
+@media screen and (max-width:1100px){
+  body:not(.embed) .ms-matrix .ms-matrix-head{display:none}
+  body:not(.embed) .ms-matrix .ms-matrix-row{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:16px 0}
+  body:not(.embed) .ms-matrix .ms-cells{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:12px}
+  body:not(.embed) .ms-matrix .ms-cell{display:grid;grid-template-rows:minmax(40px,auto) 24px;justify-items:center;align-items:center;gap:6px;border:0;border-left:1px solid #e5ebe7;padding:0 6px}
+  body:not(.embed) .ms-matrix .ms-mobile-column{display:block;text-align:center;font-size:14px;line-height:20px;white-space:break-spaces}
+  body:not(.embed) .ms-matrix .ms-key{gap:8px 20px}
+  body:not(.embed) .ms-equation .ms-equation-row{grid-template-columns:minmax(0,1fr);gap:12px;padding:16px 0}
+  body:not(.embed) .ms-equation .ms-formula{font-size:16px;line-height:22px;column-gap:8px}
+  body:not(.embed) .ms-equation .ms-multiply{grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);row-gap:10px}
+  body:not(.embed) .ms-equation .ms-multiply>.ms-equals{grid-column:1;grid-row:2}
+  body:not(.embed) .ms-equation .ms-multiply>.ms-result{grid-column:2 / 4;grid-row:2}
+  body:not(.embed) .ms-equation .ms-note{margin-top:12px}
+}
+@media print{
+  .ms-diagram{break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}

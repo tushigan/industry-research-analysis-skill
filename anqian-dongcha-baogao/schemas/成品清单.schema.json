@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/anqian-dongcha-baogao-v2/成品清单.schema.json",
+  "title": "行业调研分析成品清单",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "project_id",
+    "report_config_id",
+    "input_fingerprint",
+    "audience_mode",
+    "production_mode",
+    "delivery_scope",
+    "outputs",
+    "page_count",
+    "acceptance",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "manifest_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "report_config_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "input_fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "audience_mode": {
+      "type": "string",
+      "enum": ["client", "internal"]
+    },
+    "production_mode": {
+      "type": "string",
+      "enum": ["new_report", "content_revision", "pure_conversion", "historical_replay"]
+    },
+    "delivery_scope": {
+      "type": "string",
+      "enum": ["complete", "preview"]
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/output"
+      }
+    },
+    "page_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "acceptance": {
+      "$ref": "#/$defs/acceptance"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "passed",
+        "blocked"
+      ]
+    },
+    "quality_status": {
+      "type": "string",
+      "enum": [
+        "quality_not_revalidated",
+        "planned_pending_actual_review",
+        "chart_ratio_passed_pending_business_review"
+      ]
+    },
+    "chart_plan": {
+      "$ref": "#/$defs/chartPlan"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "output_id",
+        "kind",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "output_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "html",
+            "pdf",
+            "speaker_notes",
+            "research_data",
+            "report_config",
+            "research_notes",
+            "chart_plan",
+            "acceptance_report"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overall_status",
+        "checks"
+      ],
+      "properties": {
+        "overall_status": {
+          "type": "string",
+          "enum": [
+            "not_run",
+            "passed",
+            "failed",
+            "blocked"
+          ]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/check"
+          }
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "layer",
+        "status",
+        "evidence"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "layer": {
+          "type": "string",
+          "enum": [
+            "structure",
+            "content",
+            "browser",
+            "pdf",
+            "visual",
+            "chart_plan",
+            "chart_ratio",
+            "version"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_run",
+            "passed",
+            "failed",
+            "warning",
+            "manual_review"
+          ]
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "chartPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "plan_id", "source_sha256", "expected_page_count", "expected_qualified", "minimum", "target", "alignment"],
+      "properties": {
+        "status": { "type": "string", "const": "passed" },
+        "plan_id": { "type": "string", "minLength": 1 },
+        "source_sha256": { "$ref": "#/$defs/sha256" },
+        "expected_page_count": { "type": "integer", "minimum": 1 },
+        "expected_qualified": { "type": "integer", "minimum": 0 },
+        "minimum": { "type": "integer", "minimum": 1 },
+        "target": { "type": "integer", "minimum": 1 },
+        "alignment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["matched", "expected_page_count", "actual_page_count", "unplanned_pages", "missing_pages", "moved_pages"],
+          "properties": {
+            "matched": { "type": "boolean" },
+            "expected_page_count": { "type": "integer", "minimum": 0 },
+            "actual_page_count": { "type": "integer", "minimum": 0 },
+            "unplanned_pages": { "type": "array" },
+            "missing_pages": { "type": "array" },
+            "moved_pages": { "type": "array" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+.diagram-relationship-map>h2{margin-bottom:4px}
+.diagram-relationship-map .map-surface{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:calc(116 / 1276 * 100%);height:384px}
+.diagram-relationship-map .map-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.diagram-relationship-map .map-edge{fill:none;stroke:var(--green);stroke-width:3}
+.diagram-relationship-map .map-condition{stroke:#688093;stroke-dasharray:7 5}
+.diagram-relationship-map .map-reject{stroke:#b44b3e;stroke-dasharray:3 5}
+.diagram-relationship-map .map-column{position:relative;display:grid;grid-template-rows:48px 336px;min-width:0}
+.diagram-relationship-map .map-column>h3{margin:0;padding:6px 0;font-size:16px;line-height:24px;border-bottom:1px solid var(--line)}
+.diagram-relationship-map .map-nodes{display:grid;grid-auto-rows:1fr;min-height:0}
+.diagram-relationship-map .map-node{align-self:center;min-width:0;padding:6px 14px;border-left:4px solid var(--green);background:#f0f5f3;position:relative}
+.diagram-relationship-map .map-column:nth-of-type(2) .map-node{border-color:#738596;background:#f0f3f6}
+.diagram-relationship-map .map-column:nth-of-type(3) .map-node{border-color:#b47b42;background:#fbf4eb}
+.diagram-relationship-map h4{margin:0 0 2px;font-size:18px;line-height:22px;font-weight:650}
+.diagram-relationship-map .map-node p{margin:0;font-size:16px;line-height:20px;white-space:normal}
+.diagram-relationship-map .map-key{margin:0 0 8px;font-size:14px;line-height:20px;color:#52626a}
+.diagram-relationship-map .map-mobile-links{display:none}
+@media screen and (min-width:1101px) and (max-width:1470px){
+  body:not(.embed) .diagram-relationship-map .map-surface{height:640px}
+  body:not(.embed) .diagram-relationship-map .map-column{grid-template-rows:80px 560px}
+}
+@media screen and (max-width:1100px){
+  body:not(.embed) .diagram-relationship-map .map-surface{height:auto;display:block}
+  body:not(.embed) .diagram-relationship-map .map-links{display:none}
+  body:not(.embed) .diagram-relationship-map .map-column{display:block;margin-bottom:20px}
+  body:not(.embed) .diagram-relationship-map .map-nodes{gap:12px}
+  body:not(.embed) .diagram-relationship-map .map-column>h3{margin-bottom:12px}
+  body:not(.embed) .diagram-relationship-map .map-mobile-links{display:grid;list-style:none;margin:16px 0 0;padding:0;gap:8px}
+  body:not(.embed) .diagram-relationship-map .map-mobile-links li{display:grid;grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:8px;font-size:14px;line-height:21px;border-top:1px solid var(--line);padding:8px 0}
+  body:not(.embed) .diagram-relationship-map .map-mobile-links span{font-weight:400;color:#52626a}
+}

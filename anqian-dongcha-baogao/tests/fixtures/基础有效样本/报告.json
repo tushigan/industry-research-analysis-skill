@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1",
+  "report_config_id": "report-001",
+  "project_id": "demo-project",
+  "report_type": "consulting_deck",
+  "page_mode": "landscape_16_9",
+  "production_mode": "pure_conversion",
+  "delivery_scope": "complete",
+  "audience_mode": "internal",
+  "audience": "研究团队内部，用于决定下一轮商品观察条件",
+  "working_judgment": "待验证：先统一规格与优惠条件，再讨论价格比较",
+  "page_budget": 1,
+  "pages": [
+    {
+      "page_id": "render-page-001",
+      "storyline_page_id": "page-001",
+      "title": "先统一规格与优惠条件，再讨论价格比较",
+      "content_mode": "comparison_matrix",
+      "source_ids": [
+        "src-002",
+        "src-005",
+        "src-006"
+      ],
+      "speaker_notes": "说明这是一页内部研究阶段稿，不能把单次观察和少量访谈说成市场结论。"
+    }
+  ],
+  "attachments": []
+}

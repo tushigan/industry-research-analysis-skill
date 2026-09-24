@@ -1,0 +1,61 @@
+{
+  "schema_version": "0.1",
+  "manifest_id": "manifest-001",
+  "project_id": "demo-project",
+  "report_config_id": "report-001",
+  "input_fingerprint": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "audience_mode": "internal",
+  "production_mode": "new_report",
+  "delivery_scope": "complete",
+  "outputs": [
+    {
+      "output_id": "output-html-001",
+      "kind": "html",
+      "path": "交付/匿名研究.html",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "output_id": "output-pdf-001",
+      "kind": "pdf",
+      "path": "交付/匿名研究.pdf",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "output_id": "output-notes-001",
+      "kind": "speaker_notes",
+      "path": "交付/逐页讲解备注.md",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    {
+      "output_id": "output-data-001",
+      "kind": "research_data",
+      "path": "交付/研究数据.json",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    }
+  ],
+  "page_count": 1,
+  "acceptance": {
+    "overall_status": "not_run",
+    "checks": [
+      {
+        "check_id": "structure-001",
+        "layer": "structure",
+        "status": "not_run",
+        "evidence": "匿名技术样本只展示成品清单字段，不代表真实构建已完成。"
+      },
+      {
+        "check_id": "content-001",
+        "layer": "content",
+        "status": "manual_review",
+        "evidence": "需要研究者独立确认内容、来源和限制。"
+      },
+      {
+        "check_id": "version-001",
+        "layer": "version",
+        "status": "not_run",
+        "evidence": "输入指纹为匿名占位值，仅用于结构测试。"
+      }
+    ]
+  },
+  "status": "draft"
+}

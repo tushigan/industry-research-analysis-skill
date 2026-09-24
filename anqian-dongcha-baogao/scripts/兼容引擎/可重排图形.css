@@ -1,0 +1,62 @@
+.diagram{min-width:0;align-self:start;color:var(--ink);font-size:14px;line-height:1.5;tab-size:1}
+.diagram *{min-width:0;overflow-wrap:anywhere;letter-spacing:0}
+.diagram h2{font-size:18px;line-height:1.5;margin:0 0 16px;white-space:break-spaces}
+.diagram h3{font-size:17px;line-height:1.5;margin:3px 0 0;white-space:break-spaces}
+.diagram .diagram-label,.diagram dt{font-size:14px;line-height:1.5;color:#42594f;white-space:break-spaces}
+.diagram dt{font-weight:600}
+.diagram dd{font-size:14px;line-height:1.5;margin:3px 0 0;white-space:break-spaces}
+.diagram .diagram-items{padding:0;margin:0;list-style:none}
+.diagram .diagram-item{position:relative;font-size:14px;line-height:1.5;margin:0;padding:0;break-inside:avoid}
+.diagram .diagram-details{margin:16px 0 0;display:grid;gap:16px}
+.diagram-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:none;margin-right:8px;border:1px solid var(--green);border-radius:50%;font-size:14px;color:var(--green);background:white;white-space:normal}
+.diagram-steps .diagram-items{display:flex;gap:30px}
+.diagram-steps .diagram-item{flex:1;border-top:3px solid var(--green);padding-top:10px}
+.diagram-steps .diagram-heading{min-height:102px}
+.diagram-steps .diagram-item:not(:last-child)::before{content:"";position:absolute;left:calc(100% + 4px);top:24px;width:20px;border-top:2px solid var(--green)}
+.diagram-steps .diagram-item:not(:last-child)::after{content:"";position:absolute;left:calc(100% + 21px);top:20px;border-left:6px solid var(--green);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.diagram-steps .diagram-field{border-left:2px solid var(--line);padding-left:12px}
+.diagram-comparison .diagram-items{display:grid;gap:12px}
+.diagram-comparison .diagram-item{border-top:1px solid var(--line);padding-top:10px}
+.diagram-comparison .diagram-heading{display:flex;align-items:baseline;gap:12px}
+.diagram-comparison .diagram-heading h3{margin:0}
+.diagram-comparison .diagram-details{display:flex;gap:24px;margin-top:8px}
+.diagram-comparison .diagram-field{flex:1;padding-left:12px;border-left:3px solid var(--green)}
+.diagram-comparison .diagram-field:nth-child(2){border-color:var(--coral)}
+.diagram-comparison .diagram-field:nth-child(3){border-color:var(--gold)}
+.diagram-opportunities .diagram-items{display:flex;gap:28px}
+.diagram-opportunities .diagram-item{flex:1}
+.diagram-opportunities .diagram-heading{min-height:84px;border-bottom:2px solid var(--green);padding-bottom:12px}
+.diagram-opportunities .diagram-details{margin:0 0 0 12px;padding:20px 0 0 18px;border-left:1px solid var(--green);gap:20px}
+.diagram-opportunities .diagram-field{position:relative}
+.diagram-opportunities .diagram-field::before{content:"";position:absolute;left:-18px;top:10px;width:12px;border-top:1px solid var(--green)}
+.diagram-opportunities .diagram-risk{padding:8px 10px;border-left:3px solid var(--coral);background:#fff6f3}
+.diagram-opportunities .diagram-risk dt{color:#853d2c}
+.diagram-opportunities .diagram-risk::before{top:18px}
+.diagram-opportunities-overview .diagram-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 28px}
+.diagram-opportunities-overview .diagram-heading{display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;min-height:0;padding-bottom:6px}
+.diagram-opportunities-overview .diagram-heading h3{margin:0}
+.diagram-opportunities-overview .diagram-details{padding-top:8px;gap:6px}
+.diagram-opportunities-overview .diagram-field{display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;align-items:start}
+.diagram-opportunities-overview .diagram-field dd{margin:0}
+.diagram-opportunities-overview .diagram-risk{padding:4px 6px}
+.diagram-opportunities-overview .diagram-risk::before{top:14px}
+.diagram-page .diagram-body{align-content:start}
+@media screen and (min-width:1101px) and (max-width:1470px){
+  body:not(.embed) .diagram-page{height:auto;min-height:810px;overflow:visible}
+}
+@media screen and (max-width:1100px){
+  body:not(.embed) .diagram-steps .diagram-items,body:not(.embed) .diagram-opportunities .diagram-items{display:flex;flex-direction:column;gap:32px}
+  body:not(.embed) .diagram-steps .diagram-heading,body:not(.embed) .diagram-opportunities .diagram-heading{min-height:0}
+  body:not(.embed) .diagram-steps .diagram-item{padding-left:40px;border-top:0}
+  body:not(.embed) .diagram-steps .diagram-number{position:absolute;left:0;top:10px}
+  body:not(.embed) .diagram-steps .diagram-item:not(:last-child)::before{left:13px;top:46px;bottom:-40px;width:0;border-top:0;border-left:2px solid var(--green)}
+  body:not(.embed) .diagram-steps .diagram-item:not(:last-child)::after{left:9px;top:auto;bottom:-36px;border:0;border-top:6px solid var(--green);border-left:5px solid transparent;border-right:5px solid transparent}
+  body:not(.embed) .diagram-comparison .diagram-items{gap:24px}
+  body:not(.embed) .diagram-comparison .diagram-heading{display:block}
+  body:not(.embed) .diagram-comparison .diagram-details{flex-direction:column;gap:16px;margin-top:14px}
+  body:not(.embed) .diagram-opportunities-overview .diagram-heading,body:not(.embed) .diagram-opportunities-overview .diagram-field{display:block}
+  body:not(.embed) .diagram-opportunities-overview .diagram-heading h3,body:not(.embed) .diagram-opportunities-overview .diagram-field dd{margin-top:3px}
+}
+@media print{
+  .diagram{break-inside:avoid}
+}

@@ -1,0 +1,4 @@
+.a4_portrait .report-page{width:794px;height:1122px;padding:44px 48px 30px}
+.a4_portrait h1,.a4_portrait h2{font-size:26px}.a4_portrait .mast{font-size:11px}
+@media screen and (min-width:651px) and (max-width:825px){.a4_portrait .report-page{zoom:var(--report-scale,1)}}
+@media print{@page{size:A4 portrait;margin:0}.a4_portrait .report-page{width:210mm!important;height:297mm!important;padding:44px 48px 30px!important;zoom:1!important}}

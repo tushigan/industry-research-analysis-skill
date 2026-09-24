@@ -1,0 +1,4 @@
+.landscape_16_9 .report-page{width:1440px;height:810px;padding:30px 48px 24px}
+.landscape_16_9 .chart{height:230px}
+@media screen and (min-width:651px) and (max-width:1471px){.landscape_16_9 .report-page{zoom:var(--report-scale,1)}}
+@media print{@page{size:381mm 214.3125mm;margin:0}.landscape_16_9 .report-page{width:1440px!important;height:810px!important;padding:30px 48px 24px!important;zoom:1!important}}

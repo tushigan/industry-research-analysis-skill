@@ -1,0 +1,39 @@
+.visual-report .visual-diagram{display:flex;flex:1;min-height:0;width:100%;margin:0 0 16px}
+.visual-report .visual-diagram>.diagram{width:100%}
+.visual-report .visual-diagram-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:0 0 12px}
+.visual-report .diagram-explanation,.visual-report .diagram-meaning{font-size:14px;line-height:21px;white-space:pre-wrap;margin:0}
+.visual-report .diagram-meaning{font-weight:600;color:var(--green)}
+@media screen and (max-width:650px){
+ .visual-report .visual-diagram-notes{grid-template-columns:minmax(0,1fr);gap:8px}
+}
+@media screen and (min-width:651px) and (max-width:1470px){
+ body.visual-report:not(.embed) .visual-diagram .diagram-relationship-map .map-surface{display:grid;height:384px}
+ body.visual-report:not(.embed) .visual-diagram .diagram-relationship-map .map-column{display:grid;grid-template-rows:48px 336px;margin-bottom:0}
+ body.visual-report:not(.embed) .visual-diagram .diagram-relationship-map .map-links{display:block}
+ body.visual-report:not(.embed) .visual-diagram .diagram-relationship-map .map-mobile-links{display:none}
+}
+@media screen and (min-width:651px) and (max-width:1100px){
+ body.visual-report:not(.embed) .visual-diagram .diagram-steps .diagram-items,
+ body.visual-report:not(.embed) .visual-diagram .diagram-opportunities .diagram-items{display:flex;flex-direction:row;gap:30px}
+ body.visual-report:not(.embed) .visual-diagram .diagram-steps .diagram-heading{min-height:102px}
+ body.visual-report:not(.embed) .visual-diagram .diagram-opportunities .diagram-heading{min-height:84px}
+ body.visual-report:not(.embed) .visual-diagram .diagram-steps .diagram-item{padding-left:0;border-top:3px solid var(--green)}
+ body.visual-report:not(.embed) .visual-diagram .diagram-steps .diagram-number{position:static}
+ body.visual-report:not(.embed) .visual-diagram .diagram-steps .diagram-item:not(:last-child)::before{left:calc(100% + 4px);top:24px;bottom:auto;width:20px;border-top:2px solid var(--green);border-left:0}
+ body.visual-report:not(.embed) .visual-diagram .diagram-steps .diagram-item:not(:last-child)::after{left:calc(100% + 21px);top:20px;bottom:auto;border-left:6px solid var(--green);border-top:5px solid transparent;border-right:0;border-bottom:5px solid transparent}
+ body.visual-report:not(.embed) .visual-diagram .diagram-comparison .diagram-heading{display:flex}
+ body.visual-report:not(.embed) .visual-diagram .diagram-comparison .diagram-details{flex-direction:row;gap:24px;margin-top:8px}
+ body.visual-report:not(.embed) .visual-diagram .diagram-control-chain .chain-stages{display:flex;flex-direction:row;gap:36px}
+ body.visual-report:not(.embed) .visual-diagram .diagram-control-chain .chain-stage{display:block;padding:0 20px 0 0}
+ body.visual-report:not(.embed) .visual-diagram .diagram-control-chain .chain-fields{display:grid}
+ body.visual-report:not(.embed) .visual-diagram .diagram-control-chain .chain-next{left:calc(100% - 20px);top:42px;bottom:auto;width:56px;height:0;border-top:3px solid var(--green);border-left:0;border-bottom:0}
+ body.visual-report:not(.embed) .visual-diagram .diagram-control-chain .chain-next::after{right:0;top:-7px;bottom:auto}
+ body.visual-report:not(.embed) .visual-diagram .ms-matrix .ms-matrix-head,
+ body.visual-report:not(.embed) .visual-diagram .ms-matrix .ms-matrix-row{display:grid;grid-template-columns:180px minmax(0,1fr) minmax(0,1.15fr);gap:0 16px;padding:3px 0}
+ body.visual-report:not(.embed) .visual-diagram .ms-matrix .ms-matrix-head{min-height:40px}
+ body.visual-report:not(.embed) .visual-diagram .ms-matrix .ms-matrix-row{min-height:67px}
+ body.visual-report:not(.embed) .visual-diagram .ms-matrix .ms-cells{grid-template-columns:repeat(var(--ms-columns),minmax(0,1fr));row-gap:0}
+ body.visual-report:not(.embed) .visual-diagram .ms-matrix .ms-cell{display:flex;min-height:28px;padding:0;border-left:1px solid #e5ebe7}
+ body.visual-report:not(.embed) .visual-diagram .ms-matrix .ms-mobile-column{display:none}
+ body.visual-report:not(.embed) .visual-diagram .ms-equation .ms-equation-row{grid-template-columns:180px minmax(0,1fr);gap:16px;padding:6px 0}
+}

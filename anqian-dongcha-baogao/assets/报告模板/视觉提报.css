@@ -1,0 +1,56 @@
+@media screen{
+ body.visual-report:not(.presenter){display:grid;grid-template-rows:64px minmax(0,1fr);height:100vh;height:100dvh;overflow:hidden}
+ .visual-report:not(.presenter) #toolbar{position:static;grid-row:1;justify-self:center;align-self:center;transform:none;margin:0}
+ .visual-report:not(.presenter) #report{grid-row:2;min-height:0;overflow:auto;scroll-padding-top:12px}
+}
+.visual-report .visual-body{display:flex;flex-direction:column;flex:1;min-width:0;gap:0}
+.visual-report .visual-body .body-text{flex:none}
+.visual-report .visual-graphic{display:flex;flex:1;min-height:0;margin:0 0 24px}
+.visual-report .visual-comparison,.visual-report .visual-steps{display:grid;grid-template-columns:repeat(var(--visual-columns),minmax(0,1fr));gap:24px;width:100%;list-style:none;padding:0;margin:0}
+.visual-report .visual-column{position:relative;min-width:0;border-top:4px solid var(--green);padding:16px 16px 0;border-right:1px solid var(--line)}
+.visual-report .visual-column:last-child{border-right:0}
+.visual-report .visual-column h3{font-size:18px;line-height:27px;white-space:pre-wrap}
+.visual-report .visual-label,.visual-report dt{font-size:12px;line-height:18px;color:var(--muted);white-space:pre-wrap;margin:0 0 8px}
+.visual-report dl{margin:16px 0 0;display:flex;flex-direction:column;gap:14px}
+.visual-report dd{font-size:16px;line-height:25px;margin:0;white-space:pre-wrap}
+.visual-report .visual-steps .visual-column{border-top:0;padding-top:48px}
+.visual-report .step-number{position:absolute;top:0;left:16px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--green);color:#fff;font-size:16px;font-weight:600}
+.visual-report .step-arrow{position:absolute;top:4px;right:-22px;width:26px;height:26px;color:var(--coral)}
+.visual-report .visual-matrix{display:flex;width:100%;min-width:0;align-items:stretch}
+.visual-report .visual-matrix table{margin:0;height:100%}
+.visual-report .visual-matrix thead th{background:var(--green);color:#fff}
+.visual-report .visual-matrix th[scope=row]{background:#edf5f0;font-weight:600;border-left:3px solid var(--coral)}
+.visual-report .visual-matrix th,.visual-report .visual-matrix td{padding:8px 12px}
+.visual-report .visual-matrix td,.visual-report .visual-matrix th[scope=row]{vertical-align:middle}
+.visual-report .visual-meaning{font-size:17px;line-height:29px;font-weight:600;color:var(--green);white-space:pre-wrap;margin:0 0 16px}
+.visual-report .visual-split{display:grid;grid-template-columns:minmax(0,56fr) minmax(0,44fr);gap:32px;flex:1;margin-bottom:16px;min-height:324px}
+.visual-report .visual-media,.visual-report .visual-reading{min-width:0}
+.visual-report .visual-charts{display:grid;grid-template-columns:repeat(var(--chart-columns),minmax(0,1fr));gap:24px;margin:0 0 16px;min-width:0}
+.visual-report .visual-charts .chart-block{min-width:0;margin:0}
+.visual-report .visual-charts .chart{height:300px}
+.visual-report .chart-title{font-size:16px;line-height:24px;margin:0 0 8px;overflow-wrap:anywhere}
+.visual-report .visual-reading{padding-left:24px;border-left:3px solid var(--coral)}
+.visual-report .visual-media .chart{height:300px}
+.visual-report .visual-media .report-image{height:auto}
+.visual-report .visual-media .report-image img{height:290px}
+.visual-report .visual-media .report-image figcaption{white-space:pre-wrap}
+.visual-report [data-page-kind=appendix] .appendix-record h3{font-size:16px;line-height:24px;margin-bottom:16px}
+.visual-report [data-page-kind=appendix] .evidence-text{color:var(--muted)}
+@media screen and (max-width:650px){
+ .visual-report #report .visual-comparison,.visual-report #report .visual-steps,.visual-report #report .visual-split,.visual-report #report .visual-charts{grid-template-columns:minmax(0,1fr)}
+ .visual-report #report .visual-column{padding-bottom:16px;border-right:0;border-bottom:1px solid var(--line)}
+ .visual-report #report .visual-steps{gap:40px}.visual-report #report .step-arrow{top:auto;bottom:-34px;right:calc(50% - 13px);transform:rotate(90deg)}
+ .visual-report #report .visual-reading{padding-left:14px}.visual-report #report .visual-split{min-height:0}
+ .visual-report #report .visual-matrix th,.visual-report #report .visual-matrix td{padding:6px;font-size:13px;line-height:21px}
+ .visual-report #report .visual-media .chart{height:260px}
+}
+.visual-report .source-index-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;min-width:0}
+.visual-report .source-index-entry{padding:10px 0;border-bottom:1px solid var(--line);min-width:0}
+.visual-report .source-index-entry h3{font-size:15px;line-height:22px;margin:0 0 4px;overflow-wrap:anywhere}
+.visual-report .source-index-entry p{font-size:11px;line-height:17px;margin:0 0 3px;overflow-wrap:anywhere}
+@media screen and (max-width:650px){.visual-report #report .source-index-row{grid-template-columns:minmax(0,1fr);gap:0}}
+@media print{
+ .visual-report .visual-comparison,.visual-report .visual-steps{grid-template-columns:repeat(var(--visual-columns),minmax(0,1fr))}
+ .visual-report .visual-split{grid-template-columns:minmax(0,56fr) minmax(0,44fr)}
+ .visual-report .step-arrow{display:block}
+}

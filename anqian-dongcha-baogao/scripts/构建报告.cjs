@@ -1,144 +1,202 @@
-#!/usr/bin/env node
-'use strict';
-const fs=require('node:fs');
-const path=require('node:path');
-const crypto=require('node:crypto');
-const {fingerprint}=require('./输入指纹.cjs');
-const skill=path.resolve(__dirname,'..');
-const templates=path.join(skill,'assets/报告模板');
-const vendor=path.join(skill,'assets/依赖');
-const assert=(condition,message)=>{if(!condition)throw new Error(message);};
-const escape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const json=value=>JSON.stringify(value).replace(/</g,'\\u003c');
-const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-function text(value,label){assert(typeof value==='string'&&value.trim(),label+'不能为空');return value;}
-function date(value){assert(typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value,'日期必须是有效的YYYY-MM-DD');}
-function unique(items,label){assert(Array.isArray(items),label+'必须是数组');const ids=new Set();for(const item of items){assert(/^[a-zA-Z][\w-]*$/.test(item.id)&&!ids.has(item.id),label+'编号重复或无效');ids.add(item.id);}return ids;}
-function inside(root,relative){
-  text(relative,'文件路径');
-  const candidate=path.resolve(root,relative);
-  assert(candidate.startsWith(root+path.sep),'文件必须在项目目录内');
-  assert(fs.existsSync(candidate),'文件不存在：'+relative);
-  const real=fs.realpathSync(candidate);
-  assert(real.startsWith(root+path.sep),'软链接文件必须在项目目录内');
-  assert(fs.statSync(real).isFile(),'需要普通文件：'+relative);
-  return real;
+const fs = require('node:fs');
+const path = require('node:path');
+const { readJson, writeJson, outputLocation, localFile } = require('./lib/输入安全.cjs');
+const { scanCustomerCopy, scanRenderedResearch, feedbackFromIssues, resolveAudienceMode } = require('./lib/客户成稿.cjs');
+const { fingerprintInputs, hashFile, verifyOutputs } = require('./lib/输入指纹.cjs');
+const { prepareAttachments, prepareImages, pdfResources } = require('./lib/附件.cjs');
+const { parseArgs } = require('./lib/命令参数.cjs');
+const { resolveProductionMode, requiresChartGate } = require('./lib/制作模式.cjs');
+const PACKAGE = path.resolve(__dirname, '..');
+const inlineJson = value => JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+
+function payload(html, attachments) {
+  if (!attachments.length) return html;
+  const base = path.join(PACKAGE, 'assets/依赖/PDF阅读器');
+  const data = { documents: attachments, resources: pdfResources(),
+    pdfjs: fs.readFileSync(path.join(base, 'pdf.min.mjs')).toString('base64'),
+    worker: fs.readFileSync(path.join(base, 'pdf.worker.min.mjs')).toString('base64') };
+  const reader = fs.readFileSync(path.join(PACKAGE, 'assets/报告模板/附件阅读器.js'), 'utf8');
+  return html.replace(/<\/body>\s*<\/html>\s*$/, () => `<script id="attachment-payload" type="application/json">${inlineJson(data)}</script><script>${reader}</script></body></html>`);
 }
-function refs(ids,known,label){assert(Array.isArray(ids),label+'来源必须是数组');for(const id of ids)assert(known.has(id),label+'来源不存在：'+id);}
-function build(project,overwrite=false){
-  const root=fs.realpathSync(path.resolve(project));
-  const config=JSON.parse(fs.readFileSync(inside(root,'报告.json'),'utf8'));
-  text(config.title,'报告标题');text(config.publisher,'发布者');date(config.date);
-  assert(/^[a-zA-Z][\w-]*$/.test(config.id),'项目id必须为稳定的字母数字编号');
-  assert(typeof config.presenter==='boolean','presenter必须明确为true或false');
-  const sourceIds=unique(config.sources,'来源'),pageIds=unique(config.pages,'页面'),chartIds=unique(config.charts,'图表');
-  assert(pageIds.size>0,'报告至少需要一页');
-  unique(config.attachments,'附件');
-  for(const source of config.sources){
-    text(source.title,'来源标题');text(source.publisher,'来源机构');text(source.period,'数据时期');text(source.scope,'来源口径');
-    date(source.accessedAt);
-    if(source.publishedAt)date(source.publishedAt);
-    assert(/^https?:\/\//.test(source.url),'来源链接必须为HTTP或HTTPS');
-    const url=new URL(source.url);assert(!url.username&&!url.password,'来源链接不得包含账号密码');
+function chartPlanForBuild({ research, report, reportPath, chartPlanPath, productionMode }) {
+  const required = requiresChartGate(report, productionMode);
+  const root = path.dirname(reportPath);
+  const candidate = chartPlanPath || path.join(root, '逐页图形方案.json');
+  if (!required && !chartPlanPath) return { required: false, quality_status: 'quality_not_revalidated' };
+  if (!required && chartPlanPath && !['new_report', 'content_revision'].includes(productionMode)) {
+    throw new Error(`${productionMode}不是新制作质量验收，不能用逐页图形方案把它标成达标稿`);
   }
-  const chartMap=new Map(config.charts.map(item=>[item.id,item]));
-  const usedCharts=new Set();
-  for(const chart of config.charts){
-    text(chart.unit,'图表单位');text(chart.period,'图表时期');text(chart.scope,'图表口径');refs(chart.sourceIds,sourceIds,'图表');
-    assert(chart.sourceIds.length>0,'统计图必须关联来源');
-    assert(Array.isArray(chart.option?.series)&&chart.option.series.length>0,'图表数据不能为空');
-    for(const series of chart.option.series){
-      assert(['bar','line','pie','scatter'].includes(series.type),'首版支持bar/line/pie/scatter；其他图式需另行实现并验收');
-      assert(Array.isArray(series.data)&&series.data.length>0,'图表数据不能为空');
-      const valid=value=>typeof value==='number'&&Number.isFinite(value);
-      assert(series.data.every(item=>{const value=typeof item==='object'&&!Array.isArray(item)?item?.value:item;return Array.isArray(value)?value.length>0&&value.every(valid):valid(value);}), '图表数据必须为有限数字');
-    }
+  if (!fs.existsSync(candidate)) throw new Error('完整稿构建前缺少逐页图形方案.json，已在生成HTML/PDF前阻断');
+  const source = localFile(root, path.relative(root, candidate));
+  const plan = readJson(source);
+  const { checkChartPlan } = require('./lib/图表方案.cjs');
+  const precheck = checkChartPlan({ plan, research, report });
+  if (!precheck.passed) {
+    const error = new Error(`图表方案预检未通过：${precheck.status}；${precheck.errors.join('；') || `距离目标还差${precheck.shortfall}页`}`);
+    error.code = 'CHART_PLAN_PRECHECK'; error.chartPlan = precheck; throw error;
   }
-  const attachmentPayloads=[];
-  const documents=config.attachments.map(item=>{
-    assert(item.shareApproved===true&&typeof item.shareBasis==='string'&&item.shareBasis.trim(),'附件必须明确分享许可及依据，公开可下载不等于可分发');
-    assert(sourceIds.has(item.sourceKey),'附件来源不存在');
-    text(item.title,'附件标题');text(item.formatLabel,'附件格式说明');
-    assert(Number.isInteger(item.pages)&&item.pages>0&&Number.isInteger(item.citedPage)&&item.citedPage>=1&&item.citedPage<=item.pages,'附件页数或引用页无效');
-    const bytes=fs.readFileSync(inside(root,item.file));
-    assert(bytes.subarray(0,5).toString()==='%PDF-','附件不是PDF');
-    attachmentPayloads.push(`<script type="application/octet-stream" id="embedded-pdf-${item.id}">${bytes.toString('base64')}</script>`);
-    return {id:item.id,sourceKey:item.sourceKey,title:item.title,pages:item.pages,citedPage:item.citedPage,formatLabel:item.formatLabel,description:item.description||'',filename:path.basename(item.file),bytes:bytes.length,sha256:sha(bytes)};
-  });
-  assert(new Set(documents.map(item=>item.sourceKey)).size===documents.length,'一个来源编号只能对应一份附件，请为不同文件拆分来源');
-  const sourceMap=new Map(config.sources.map(source=>[source.id,source]));
-  const documentMap=new Map(documents.map(item=>[item.sourceKey,item]));
-  const link=(id,page)=>{
-    const source=sourceMap.get(id);const attachment=documentMap.get(id);
-    if(page!==undefined)assert(attachment&&Number.isInteger(page)&&page>=1&&page<=attachment.pages,'引用页必须在已嵌入PDF范围内');
-    return `<a data-source="${escape(id)}"${page?' data-pdf-page="'+page+'"':''} href="${escape(source.url)}">${escape(source.title)}${page?' · PDF第'+page+'页':''}</a>`;
-  };
-  function block(item){
-    const heading=item.title?`<h2>${escape(item.title)}</h2>`:'';
-    if(item.type==='text')return `<div>${heading}<p>${escape(text(item.text,'说明文字')).replace(/\n/g,'<br>')}</p></div>`;
-    if(item.type==='list'){assert(Array.isArray(item.items)&&item.items.length,'列表不能为空');return `<div>${heading}<ul>${item.items.map(value=>'<li>'+escape(value)+'</li>').join('')}</ul></div>`;}
-    if(item.type==='chart'){
-      assert(chartIds.has(item.chartId)&&!usedCharts.has(item.chartId),'图表缺失或在多个页面重复使用：'+item.chartId);
-      usedCharts.add(item.chartId);const chart=chartMap.get(item.chartId);
-      return `<figure class="plot">${heading}<p class="sub">${escape(chart.period)} · ${escape(chart.unit)}</p><div class="chart" id="chart-${escape(item.chartId)}" aria-label="${escape(item.title||item.chartId)}"></div><figcaption>${escape(chart.scope)} · ${chart.sourceIds.map(id=>link(id)).join('；')}</figcaption></figure>`;
-    }
-    if(item.type==='image'){
-      const file=inside(root,item.file),ext=path.extname(file).toLowerCase();
-      const mime={'.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp'}[ext];
-      assert(mime,'图片只支持PNG/JPEG/WebP，请先转换其他格式');
-      return `<figure class="report-image">${heading}<img src="data:${mime};base64,${fs.readFileSync(file).toString('base64')}" alt="${escape(text(item.alt,'图片描述'))}"><figcaption>${escape(text(item.caption,'图片来源说明'))}</figcaption></figure>`;
-    }
-    if(item.type==='table'){
-      assert(Array.isArray(item.headers)&&item.headers.length&&Array.isArray(item.rows)&&item.rows.length&&item.rows.every(row=>Array.isArray(row)&&row.length===item.headers.length),'表格行列不一致');
-      return `<div>${heading}<table><thead><tr>${item.headers.map(value=>'<th>'+escape(value)+'</th>').join('')}</tr></thead><tbody>${item.rows.map(row=>'<tr>'+row.map(value=>'<td>'+escape(value)+'</td>').join('')+'</tr>').join('')}</tbody></table></div>`;
-    }
-    throw new Error('未知内容块类型：'+item.type);
-  }
-  const pageHtml=config.pages.map((page,index)=>{
-    text(page.title,'页面标题');text(page.section,'页面主题');text(page.notes,'讲解备注');text(page.takeaway,'页面判断');
-    refs(page.sourceIds,sourceIds,'页面');
-    assert(['single','two-one','two-equal','three'].includes(page.layout),'无效页面布局');
-    assert(Array.isArray(page.blocks)&&page.blocks.length>0,'页面内容不能为空');
-    const citations=page.citations||page.sourceIds.map(sourceId=>({sourceId}));
-    for(const cite of citations)assert(sourceIds.has(cite.sourceId),'页面引用来源不存在');
-    const links=citations.map(cite=>link(cite.sourceId,cite.page)).join('；');
-    const body=page.blocks.map(block).join('');
-    return `<section class="page" id="p${index+1}" data-page-id="${escape(page.id)}"><div class="mast"><span>${escape(config.publisher)} <b>研究与洞察</b></span><span>${escape(config.title)} · ${escape(page.section)}</span></div><header><div class="eyebrow">${String(index+1).padStart(2,'0')} / ${escape(page.section)}</div><h1>${escape(page.title)}</h1><p>${escape(page.subtitle||'')}</p></header><div class="body ${page.layout}">${body}</div><div class="takeaway"><b>我们的观点</b><span>${escape(page.takeaway)}</span></div><footer><div>${links}${links?'<br>':''}${escape(page.sourceNote||'')} · ${escape(config.date)}</div><b>${index+1} / ${config.pages.length}</b></footer></section>`;
-  }).join('\n');
-  assert(usedCharts.size===chartIds.size,'存在未使用图表，先清理或放入对应页面');
-  const payload=[`<script type="application/json" id="document-manifest">${json(documents)}</script>`,...attachmentPayloads];
-  if(documents.length){
-    const pdfRoot=path.join(vendor,'PDF阅读器');
-    for(const [filename,id] of [['pdf.min.mjs','embedded-pdfjs'],['pdf.worker.min.mjs','embedded-pdfjs-worker']])payload.push(`<script type="application/octet-stream" id="${id}">${fs.readFileSync(path.join(pdfRoot,filename)).toString('base64')}</script>`);
-    const resources={cMapUrl:{},standardFontDataUrl:{}};
-    for(const [directory,kind,pattern] of [['cmaps','cMapUrl',/\.bcmap$/],['standard_fonts','standardFontDataUrl',/\.(pfb|ttf)$/]])for(const filename of fs.readdirSync(path.join(pdfRoot,directory)).filter(name=>pattern.test(name)))resources[kind][filename]=fs.readFileSync(path.join(pdfRoot,directory,filename)).toString('base64');
-    payload.push(`<script type="application/json" id="embedded-pdfjs-resources">${json(resources)}</script>`);
-  }
-  const script=code=>'<script>'+code.replace(/<\/script/gi,'<\\/script')+'</script>';
-  const runtime={title:config.title,namespace:'anqian-'+config.id,presenter:config.presenter};
-  const chartData={sources:Object.fromEntries(config.sources.map(source=>[source.id,source.url])),charts:config.charts.map(({id,option})=>({id:'chart-'+id,option}))};
-  const scripts=['echarts.min.js','lucide.min.js'].map(filename=>script(fs.readFileSync(path.join(vendor,filename),'utf8')));
-  scripts.push(script(`window.REPORT_CONFIG=${json(runtime)};window.REPORT_DATA=${json(chartData)};window.PAGE_NOTES=${json(config.pages.map(page=>page.notes))};`));
-  for(const filename of ['报告交互.js','资料阅读器.js'])scripts.push(script(fs.readFileSync(path.join(templates,filename),'utf8')));
-  const extraStyle='.body.single{grid-template-columns:minmax(0,1fr)}.body.two-equal{grid-template-columns:repeat(2,minmax(0,1fr))}.body.three{grid-template-columns:repeat(3,minmax(0,1fr))}.report-image img{width:100%;height:290px;object-fit:contain}.body li{font-size:15px;line-height:1.8;margin-bottom:10px}@media(max-width:800px){.body.two-equal,.body.three{grid-template-columns:minmax(0,1fr)}.report-image img{height:220px}}';
-  const replacements={TITLE:escape(config.title),STYLE:fs.readFileSync(path.join(templates,'报告样式.css'),'utf8')+extraStyle,PAGES:pageHtml,ATTACHMENTS:payload.join('\n'),SCRIPTS:scripts.join('\n')};
-  const shell=fs.readFileSync(path.join(templates,'报告外壳.html'),'utf8');
-  for(const key of Object.keys(replacements))assert(shell.split('{{'+key+'}}').length===2,'模板标记数量错误：'+key);
-  const html=shell.replace(/\{\{(TITLE|STYLE|PAGES|ATTACHMENTS|SCRIPTS)\}\}/g,(_,key)=>replacements[key]);
-  const output=path.join(root,'交付');
-  if(fs.existsSync(output))assert(fs.realpathSync(output)===output,'交付目录不能为软链接');
-  fs.mkdirSync(output,{recursive:true});
-  const manifest={title:config.title,id:config.id,date:config.date,pages:config.pages.length,charts:config.charts.length,presenter:config.presenter,documents,inputSha256:fingerprint(root,config),htmlSha256:sha(Buffer.from(html)),bytes:Buffer.byteLength(html)};
-  const files={'案前洞察.html':html,'逐页讲解备注.md':`# ${config.title}\n\n${config.date}\n\n`+config.pages.map((page,index)=>`## 第${index+1}页 · ${page.title}\n\n${page.notes}`).join('\n\n'),'成品清单.json':JSON.stringify(manifest,null,2),'研究数据.json':JSON.stringify(config,null,2)};
-  for(const name of Object.keys(files))if(fs.existsSync(path.join(output,name))){assert(!fs.lstatSync(path.join(output,name)).isSymbolicLink(),'输出文件不能为软链接');assert(overwrite,'交付文件已存在，确认后传入--overwrite');}
-  for(const [name,content] of Object.entries(files)){
-    const temporary=path.join(output,'.'+name+'.'+crypto.randomUUID()+'.tmp');fs.writeFileSync(temporary,content,{flag:'wx'});fs.renameSync(temporary,path.join(output,name));
-  }
-  return manifest;
+  return { required, source, plan, precheck, source_sha256: hashFile(source),
+    quality_status: 'planned_pending_actual_review' };
 }
-module.exports={build};
-if(require.main===module){
-  if(process.argv.includes('--help')){console.log('用法：node 构建报告.cjs 项目目录 [--overwrite]\n读取报告.json，生成交付/案前洞察.html及备注、清单、研究数据；构建不访问网络。');process.exit(0);}
-  try{assert(process.argv[2]&&!process.argv[2].startsWith('--'),'请提供项目目录；使用--help查看说明');console.log(JSON.stringify(build(process.argv[2],process.argv.includes('--overwrite')),null,2));}
-  catch(error){console.error('构建未完成：'+error.message);process.exitCode=1;}
+function buildReport({ researchPath, reportPath, outputDir, overwrite = false, audienceMode = null,
+  chartPlanPath = null, productionMode = null }) {
+  if (reportPath && require('./lib/旧版输入.cjs').isLegacyConfig(readJson(reportPath))) {
+    return require('./lib/旧版交付.cjs').buildLegacy({ researchPath, reportPath, outputDir, overwrite,
+      chartPlanPath, productionMode });
+  }
+  if (!researchPath || !reportPath || !outputDir) throw new Error('需要研究数据、报告配置和独立输出目录');
+  researchPath = fs.realpathSync(researchPath); reportPath = fs.realpathSync(reportPath);
+  const target = outputLocation(outputDir, [researchPath, reportPath]);
+  const research = readJson(researchPath), report = readJson(reportPath);
+  const resolvedProductionMode = resolveProductionMode(report, productionMode);
+  report.production_mode = resolvedProductionMode;
+  const resolvedAudienceMode = resolveAudienceMode(research, report, audienceMode);
+  // Customer is the default. Internal mode is explicit and is only for audit/replay artifacts.
+  const expressionIssues = resolvedAudienceMode === 'client'
+    ? [...scanCustomerCopy(report), ...scanRenderedResearch(research, report, resolvedAudienceMode)]
+    : [];
+  if (expressionIssues.length) {
+    writeJson(path.join(path.dirname(reportPath), '成稿表达反馈.json'),
+      feedbackFromIssues(expressionIssues, { reportPath, mode: 'client' }));
+    const error = new Error(`客户成稿表达不合规：${expressionIssues.length}处`);
+    error.code = 'CUSTOMER_COPY_EXPRESSION';
+    error.expressionIssues = expressionIssues;
+    throw error;
+  }
+  const chartPlan = chartPlanForBuild({ research, report, reportPath, chartPlanPath, productionMode: resolvedProductionMode });
+  const inputs = fingerprintInputs(researchPath, reportPath, resolvedAudienceMode, chartPlan.source || null,
+    resolvedProductionMode);
+  const { validateResearch } = require('./验证研究数据.cjs');
+  const validation = validateResearch(research, report);
+  if (!validation.ok) {
+    const error = new Error(`研究校验未通过：${JSON.stringify(validation.issues)}`);
+    error.validation = validation; throw error;
+  }
+  const { validateChart, pageCharts } = require('./lib/图表安全.cjs');
+  for (const page of report.pages) {
+    for (const chart of pageCharts(page)) {
+      const issues = validateChart(chart);
+      if (issues.some(issue => issue.severity === 'fatal')) throw new Error(`图表校验失败：${JSON.stringify(issues)}`);
+    }
+  }
+  const root = path.dirname(reportPath);
+  const attachments = prepareAttachments(report, root);
+  const renderConfig = prepareImages(report, root);
+  const { renderReport } = require('./lib/渲染报告.cjs');
+  const assets = Object.fromEntries(['echarts', 'lucide'].map(name => [name,
+    fs.readFileSync(path.join(PACKAGE, `assets/依赖/${name}.min.js`), 'utf8')]));
+  let rendered;
+  const html = payload(renderReport({ research, report: { ...renderConfig, audience_mode: resolvedAudienceMode,
+      production_mode: resolvedProductionMode, delivery_scope: report.delivery_scope },
+    fingerprint: inputs.fingerprint, reportConfigSha256: hashFile(reportPath),
+    chartPlanRequired: Boolean(chartPlan.plan), chartPlanSha256: chartPlan.source_sha256 || null, assets, attachments,
+    onRendered: data => { rendered = data; } }), attachments);
+  if (!rendered?.pageCount) throw new Error('渲染器没有生成报告页面元数据');
+  const alignment = chartPlan.plan
+    ? require('./lib/图表方案.cjs').comparePlanToActual(chartPlan.plan, rendered.pages) : null;
+  if (fs.existsSync(target)) {
+    if (!overwrite) throw new Error('输出目录已存在；默认拒绝覆盖。核对后使用 --overwrite');
+    if (fs.lstatSync(target).isSymbolicLink()) throw new Error('输出目录不能是符号链接');
+    const previous = readJson(path.join(target, '成品清单.json'));
+    verifyOutputs(target, previous);
+    const known = new Set(['成品清单.json', '验收', ...previous.outputs.map(item => item.path)]);
+    if (fs.readdirSync(target).some(name => !known.has(name))) throw new Error('输出目录有非构建文件，拒绝覆盖');
+  }
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  const stage = fs.mkdtempSync(path.join(path.dirname(target), '.报告构建-'));
+  let backup;
+  try {
+    fs.mkdirSync(path.join(stage, '验收'));
+    fs.writeFileSync(path.join(stage, '案前洞察.html'), html);
+    if (chartPlan.plan) {
+      writeJson(path.join(stage, '验收/逐页图形方案.json'), chartPlan.plan);
+      writeJson(path.join(stage, '验收/图表方案对齐.json'), alignment);
+    }
+    if (rendered.notebookHTML) fs.writeFileSync(path.join(stage, '研究底稿.html'), rendered.notebookHTML);
+    fs.copyFileSync(researchPath, path.join(stage, '研究数据.json'));
+    fs.copyFileSync(reportPath, path.join(stage, '报告配置.json'));
+    const notes = rendered.pages.map((page, index) => `## ${index + 1}. ${page.title}\n\n${page.notes}\n\n来源：${page.sources.map(source => source.source_id).join('、')}\n`).join('\n');
+    const notesHeader = resolvedAudienceMode === 'client'
+      ? '# 逐页讲解备注\n\n'
+      : `# 逐页讲解备注\n\n输入指纹：${inputs.fingerprint}\n\n`;
+    fs.writeFileSync(path.join(stage, '逐页讲解备注.md'), `${notesHeader}${notes}`);
+    const physical = rendered.pageCount;
+    if (!physical) throw new Error('渲染器没有生成报告页面');
+    const outputs = [['html','案前洞察.html'],['research_data','研究数据.json'],['report_config','报告配置.json'],['speaker_notes','逐页讲解备注.md']]
+      .map(([kind, file], i) => ({ output_id: `out-${i + 1}`, kind, path: file, sha256: hashFile(path.join(stage, file)) }));
+    if (rendered.notebookHTML) outputs.push({ output_id: 'out-notebook', kind: 'research_notes', path: '研究底稿.html', sha256: hashFile(path.join(stage, '研究底稿.html')) });
+    if (chartPlan.plan) {
+      outputs.push({ output_id: 'out-chart-plan', kind: 'chart_plan', path: '验收/逐页图形方案.json',
+        sha256: hashFile(path.join(stage, '验收/逐页图形方案.json')) });
+      outputs.push({ output_id: 'out-chart-alignment', kind: 'acceptance_report', path: '验收/图表方案对齐.json',
+        sha256: hashFile(path.join(stage, '验收/图表方案对齐.json')) });
+    }
+    const manifest = { schema_version: '0.1', manifest_id: `delivery-${inputs.fingerprint.slice(0, 12)}`,
+      project_id: research.project.project_id, report_config_id: report.report_config_id,
+      input_fingerprint: inputs.fingerprint, audience_mode: resolvedAudienceMode, production_mode: resolvedProductionMode,
+      delivery_scope: report.delivery_scope,
+      outputs, page_count: physical, status: 'draft', quality_status: chartPlan.quality_status,
+      ...(chartPlan.plan ? { chart_plan: { status: 'passed', plan_id: chartPlan.plan.plan_id,
+        source_sha256: chartPlan.source_sha256, expected_page_count: chartPlan.precheck.expected_page_count,
+        expected_qualified: chartPlan.precheck.qualified, minimum: chartPlan.precheck.minimum,
+        target: chartPlan.precheck.target, alignment } } : {}),
+      acceptance: { overall_status: 'not_run', checks: [
+        { check_id: 'structure', layer: 'structure', status: 'passed', evidence: '研究与报告配置结构及引用检查通过' },
+        ...(chartPlan.plan ? [{ check_id: 'chart_plan', layer: 'chart_plan', status: 'passed',
+          evidence: `生成前预检通过；预计${chartPlan.precheck.expected_page_count}页、${chartPlan.precheck.qualified}页图表主导；实际页序${alignment.matched ? '一致' : '有变化，见验收/图表方案对齐.json'}` }]
+          : [{ check_id: 'chart_plan', layer: 'chart_plan', status: 'warning', evidence: '非完整稿或历史用途，没有把本次构建作为新制作报告质量证明' }]),
+        { check_id: 'content', layer: 'content', status: 'manual_review', evidence: '硬规则已检查；事实和观点仍需研究负责人审校' },
+        { check_id: 'visual', layer: 'visual', status: 'not_run', evidence: '尚未进行实际页面查看' }
+      ] } };
+    writeJson(path.join(stage, '成品清单.json'), manifest);
+    writeJson(path.join(stage, '验收/内容检查.json'), validation);
+    writeJson(path.join(stage, '验收/构建记录.json'), { researchPath, reportPath, audience_mode: resolvedAudienceMode, files: inputs.files,
+      input_fingerprint: inputs.fingerprint, report_type: report.report_type, page_mode: report.page_mode,
+      quality_status: chartPlan.quality_status, production_mode: resolvedProductionMode,
+      delivery_scope: report.delivery_scope,
+      ...(chartPlan.plan ? { chart_plan: { plan_id: chartPlan.plan.plan_id,
+        source_path: chartPlan.source, source_sha256: chartPlan.source_sha256,
+        precheck: chartPlan.precheck, alignment } } : {}),
+      attachments: attachments.map(({ data_base64, ...item }) => item) });
+    if (fingerprintInputs(researchPath, reportPath, resolvedAudienceMode, chartPlan.source || null,
+      resolvedProductionMode).fingerprint !== inputs.fingerprint) throw new Error('构建过程中输入发生变化，未替换原成品');
+    if (fs.existsSync(target)) { backup = `${stage}-previous`; fs.renameSync(target, backup); }
+    fs.renameSync(stage, target);
+    // Preserve the prior delivery when explicitly rebuilding, including any earlier acceptance evidence.
+    return { outputDir: target, fingerprint: inputs.fingerprint, page_count: physical, backup: backup || null,
+      validation: validation.counts, audience_mode: resolvedAudienceMode, status: 'built_not_accepted' };
+  } catch (error) {
+    fs.rmSync(stage, { recursive: true, force: true });
+    if (backup && !fs.existsSync(target)) fs.renameSync(backup, target);
+    throw error;
+  }
 }
+function build(project, overwrite = false) {
+  const root = fs.realpathSync(project), reportPath = path.join(root, '报告.json');
+  const legacy = require('./lib/旧版输入.cjs').isLegacyConfig(readJson(reportPath));
+  const candidate = path.join(root, '研究数据.json');
+  return buildReport({ reportPath, researchPath: !legacy || fs.existsSync(candidate) ? candidate : undefined,
+    outputDir: path.join(root, '交付'), overwrite });
+}
+if (require.main === module) {
+  try {
+    const argv = process.argv.slice(2);
+    if (argv.includes('--help')) console.log('用法：node 构建报告.cjs 项目目录 [--production new_report|content_revision|pure_conversion|historical_replay] [--plan 逐页图形方案.json] [--overwrite]\n或 --research 研究数据.json --report 报告.json --out 交付目录 [--audience client|internal] [--production ...] [--plan ...] [--overwrite]\n完整新稿和内容修订必须声明production_mode并先通过逐页方案；纯转换和历史回放只标记未重新证明质量。');
+    else if (argv[0] && !argv[0].startsWith('--')) {
+      const rest = argv.slice(1);
+      const args = parseArgs(rest, { '--production': 'string', '--plan': 'string', '--overwrite': 'boolean' });
+      const root = fs.realpathSync(argv[0]), reportPath = path.join(root, '报告.json');
+      const legacy = require('./lib/旧版输入.cjs').isLegacyConfig(readJson(reportPath));
+      const candidate = path.join(root, '研究数据.json');
+      console.log(JSON.stringify(buildReport({ reportPath, researchPath: !legacy || fs.existsSync(candidate) ? candidate : undefined,
+        outputDir: path.join(root, '交付'), overwrite: args.overwrite, productionMode: args.production || null,
+        chartPlanPath: args.plan || null }), null, 2));
+    } else {
+      const args = parseArgs(argv, { '--research': 'string', '--report': 'string', '--out': 'string', '--audience': 'string', '--production': 'string', '--plan': 'string', '--overwrite': 'boolean' });
+      console.log(JSON.stringify(buildReport({ researchPath: args.research, reportPath: args.report, outputDir: args.out,
+        audienceMode: args.audience || null, productionMode: args.production || null,
+        chartPlanPath: args.plan || null, overwrite: args.overwrite }), null, 2));
+    }
+  } catch (error) { console.error(error.message); process.exitCode = 1; }
+}
+module.exports = { buildReport, build };

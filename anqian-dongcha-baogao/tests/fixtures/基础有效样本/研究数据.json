@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.1",
+  "project": {"project_id":"demo-project","name":"匿名食品研究技术样本","version":"2026-09-18-demo","status":"internal_draft","report_modes":["consulting_deck","long_report"]},
+  "questions": [
+    {"question_id":"q-001","business_meaning":"判断不同购买入口下的商品比较条件是否一致","scope":"匿名示例商品与公开统计，不代表任何客户或当前市场","status":"in_progress"},
+    {"question_id":"q-002","business_meaning":"识别价格表达差异可能对应的竞争机制","scope":"仅用于技术演示，不外推消费者总体偏好","status":"open"}
+  ],
+  "sources": [
+    {"source_id":"src-001","title":"匿名消费者调查技术样本","publisher_or_author":"匿名研究团队","original_url_or_file":"https://example.com/research/src-001","publication_date":"2026-08-20","collection_date":"2026-09-18","data_period":"2026-08","scope":"匿名成年零食购买者技术样本","access_method":"匿名公开示例","share_restriction":"仅作技术回归","source_kind":"original","original_location":"匿名技术示例正文，非真实研究来源"},
+    {"source_id":"src-002","title":"匿名商品页面观察技术样本","publisher_or_author":"匿名商品页面","original_url_or_file":"https://example.com/product/src-002","publication_date":"未披露","collection_date":"2026-09-18","data_period":"2026-09-18 采集时点","scope":"单一匿名商品页面","access_method":"匿名公开商品页","share_restriction":"仅作技术回归","source_kind":"original","original_location":"匿名技术示例正文，非真实研究来源"},
+    {"source_id":"src-003","title":"匿名企业披露技术样本","publisher_or_author":"匿名企业","original_url_or_file":"https://example.com/company/src-003","publication_date":"2026-06-30","collection_date":"2026-09-18","data_period":"2025 财年","scope":"单一企业自报信息","access_method":"匿名公开文件","share_restriction":"仅作技术回归","source_kind":"original","original_location":"匿名技术示例正文，非真实研究来源"},
+    {"source_id":"src-004","title":"匿名行业统计技术样本","publisher_or_author":"匿名统计机构","original_url_or_file":"https://example.com/statistics/src-004","publication_date":"2026-07-01","collection_date":"2026-09-18","data_period":"2025 年","scope":"匿名示例统计总体","access_method":"匿名公开统计页","share_restriction":"仅作技术回归","source_kind":"original","original_location":"匿名技术示例正文，非真实研究来源"},
+    {"source_id":"src-005","title":"匿名访谈技术样本","publisher_or_author":"匿名研究记录","original_url_or_file":"fixture://src-005","publication_date":"未披露","collection_date":"2026-09-18","data_period":"2026-09","scope":"匿名渠道从业者技术样本","access_method":"匿名内部记录","share_restriction":"仅作技术回归","source_kind":"original","original_location":"匿名技术示例正文，非真实研究来源"},
+    {"source_id":"src-006","title":"匿名计算输入技术样本","publisher_or_author":"由匿名证据推导","original_url_or_file":"fixture://src-006","publication_date":"2026-09-18","collection_date":"2026-09-18","data_period":"2026-09-18","scope":"只用于展示可复算计算","access_method":"由输入证据生成","share_restriction":"仅作技术回归","source_kind":"original","original_location":"匿名技术示例正文，非真实研究来源"}
+  ],
+  "evidence": [
+    {"evidence_id":"ev-001","question_ids":["q-001"],"source_id":"src-001","evidence_type":"consumer_survey","claim":"技术样本中，受访者能识别给定购买场景的规格信息","limitations":"样本仅用于结构测试，不能代表客户专项调查或总体比例","review_status":"reviewed","sample_size":120,"population":"匿名成年零食购买者技术样本","method":"匿名线上问卷技术样本","survey_period":"2026-08","question_wording":"在给定购买场景下，你能否识别商品规格信息？","claim_type":"fact","analysis_level":"task","response_mode":"single","weighting":"未加权，技术样本","error_information":"未披露"},
+    {"evidence_id":"ev-002","question_ids":["q-001","q-002"],"source_id":"src-002","evidence_type":"product_observation","claim":"匿名商品页面显示单件规格、页面价格和当次优惠资格","limitations":"这是一次页面观察，不能推出持续趋势、消费者偏好或渠道利润","review_status":"reviewed","brand":"匿名品牌","product":"匿名谷物点心","merchant":"匿名销售主体","specification":"500g / 1 件","observed_price":19.9,"currency":"CNY","promotion_eligibility":"页面未见额外优惠","region":"中国大陆匿名地区","stock_status":"有货","observed_at":"2026-09-18","entry_point":"匿名商品详情页","claim_type":"fact","analysis_level":"task","quantity":1,"shipping":"页面未披露运费，本样本只比较标价，不声称到手价"},
+    {"evidence_id":"ev-003","question_ids":["q-002"],"source_id":"src-003","evidence_type":"company_disclosure","claim":"匿名企业披露了一个自报经营范围，用于展示披露口径记录","limitations":"单一企业自报信息不能直接代表行业规律，且未披露样本量","review_status":"unreviewed","publisher":"匿名企业","self_reported":true,"document_title":"匿名经营披露技术样本","report_period":"2025 财年","definition_scope":"企业自报的匿名示例口径","original_location":"第 2 页，表 1","claim_type":"fact","analysis_level":"task"},
+    {"evidence_id":"ev-004","question_ids":["q-001","q-002"],"source_id":"src-004","evidence_type":"industry_statistic","claim":"匿名统计机构提供了一个带总体、时期和单位的技术示例","limitations":"统计总体与匿名商品观察不完全同口径，不能替代细分品类容量","review_status":"reviewed","statistical_agency":"匿名统计机构","definition":"匿名示例品类的公开统计定义","population":"匿名统计总体","geography":"匿名地区","period":"2025 年","unit":"亿元","denominator":"统计总体总量","method":"匿名公开统计方法说明","claim_type":"fact","analysis_level":"task"},
+    {"evidence_id":"ev-005","question_ids":["q-002"],"source_id":"src-005","evidence_type":"qualitative_interview","claim":"匿名访谈对象提到渠道促销条件可能影响商品比较","limitations":"只有少量匿名定性材料，不能升级为总体比例或因果结论","review_status":"unreviewed","participant_role":"匿名渠道从业者","participant_count_or_selection":"3 位匿名从业者，按角色选择","interview_date":"2026-09-18","record_location":"匿名技术记录第 1 段","anonymity":"已匿名","excerpt_or_observation":"观察：促销资格如果不清晰，比较时可能优先看页面标价。","claim_type":"fact","analysis_level":"task"},
+    {"evidence_id":"ev-006","question_ids":["q-002"],"source_id":"src-006","evidence_type":"derived_calculation","claim":"按统一规格换算得到一个仅供技术演示的单位价格","limitations":"结果依赖匿名商品观察的单次价格和规格，不是市场平均价格","review_status":"reviewed","input_evidence_ids":["ev-002"],"formula":"19.9 / 0.5","conversions":"500g 换算为 0.5kg","assumptions":"忽略运费和未见的后续优惠","unit":"CNY/kg","rounding":"保留两位小数","claim_type":"judgment","analysis_level":"task","comparison_conditions":"单件500g标价换算，不含运费"}
+  ],
+  "calculations": [
+    {"calculation_id":"calc-001","input_evidence_ids":["ev-002"],"formula":"19.9 / 0.5","assumptions":"规格中的 500g 等于 0.5kg，未见额外优惠","unit":"CNY/kg","rounding":"保留两位小数","conversions":"500g = 0.5kg","comparison_conditions":"单次商品页面标价，不代表到手价"}
+  ],
+  "hypotheses": [
+    {"hypothesis_id":"hyp-001","statement":"工作假设：规格和优惠条件的表达差异可能影响不同购买入口之间的价格比较","falsifier":"在同规格、同优惠资格和同地区条件下，比较结果仍稳定不受表达方式影响","question_ids":["q-001","q-002"],"supporting_evidence_ids":["ev-002","ev-005"],"counter_evidence_ids":[],"competing_mechanism_ids":["mech-001","mech-002"],"next_discriminating_evidence":"在多个入口按同规格、同优惠资格和同地区条件重复采集商品观察","status":"draft","analysis_level":"task"}
+  ],
+  "mechanisms": [
+    {"mechanism_id":"mech-001","name":"规格表达机制","object":"不同页面的商品比较","derivation":"如果规格和件数表达不一致，用户需要额外换算，页面标价可能成为替代比较线索","supporting_evidence_ids":["ev-001","ev-002"],"alternative_explanations":["用户可能更在意品牌熟悉度而不是规格表达"],"boundaries":"仅适用于匿名技术样本和同类商品比较场景","client_implication":"后续研究应把规格、件数、单位价格和优惠资格放在同一观察表中","analysis_level":"task"},
+    {"mechanism_id":"mech-002","name":"渠道促销机制","object":"不同购买入口的价格判断","derivation":"如果优惠资格在入口之间不一致，页面价格差异可能来自促销条件而非商品本身","supporting_evidence_ids":["ev-002","ev-005"],"alternative_explanations":["运费、库存和配送范围也可能造成实际支付差异"],"boundaries":"未完成多地区和多时间点重复观察","client_implication":"比较前需要记录地区、库存、运费和优惠资格","analysis_level":"task"}
+  ],
+  "literature_comparisons": [
+    {"literature_id":"lit-001","framework":"匿名商品比较框架","source_id":"src-004","relation":"missing_dimension","comparison_level":"公开统计总体与商品页面观察不是同一分析层次","limitations":"技术样本没有提供足够资料判断框架的外部适用性","evidence_ids":["ev-002"],"source_level":"market","current_level":"task","level_difference":"统计总体与单个商品观察不同，不作直接因果或数值比较","discrimination":"当前证据无法区分机制"}
+  ],
+  "points_of_view": [
+    {"pov_id":"pov-001","judgment":"当前更适合把规格、优惠资格和地区作为后续研究的比较控制项，而不是直接下价格竞争结论","question_ids":["q-001","q-002"],"evidence_ids":["ev-002","ev-005","ev-006"],"derivation":"商品观察提供了单次比较条件，访谈提供了可能机制，计算只展示单位换算；三者不足以证明持续价格趋势","alternative_explanations":["品牌熟悉度、运费和库存也可能影响比较结果"],"boundaries":"仅为匿名技术样本中的内部研究阶段判断","business_implication":"后续研究需要先把比较条件记录完整，再讨论价格或渠道策略","discussion_action":"确认后续采集的入口、地区、规格、优惠和时间范围","status":"draft","claim_type":"judgment","analysis_level":"task"}
+  ],
+  "storyline": [
+    {"page_id":"page-001","title":"先统一规格与优惠条件，再讨论价格比较","point_of_view_id":"pov-001","evidence_ids":["ev-002","ev-005","ev-006"],"visual_task":"用条件对照矩阵展示规格、优惠资格、地区和采集时间","business_meaning":"把下一轮研究从泛泛比价改成可复核的同条件观察","speaker_notes":"这是内部研究阶段稿的工作判断，不代表当前市场结论；先说明单次观察和少量访谈的限制。","source_ids":["src-002","src-005","src-006"],"limitations":"匿名技术样本，不用于对客发布或总体外推","page_status":"research_stage"}
+  ],
+  "attachments": []
+}

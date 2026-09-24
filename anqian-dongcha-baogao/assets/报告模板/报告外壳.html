@@ -1,21 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="report-fingerprint" content="{{FINGERPRINT}}">
 <title>{{TITLE}}</title>
 <style>{{STYLE}}</style>
 </head>
-<body>
-<main id="report">
-{{PAGES}}
-</main>
-<nav id="toolbar" aria-label="报告翻页"><button data-action="prev" title="上一页" aria-label="上一页"><i data-lucide="chevron-left"></i></button><span id="page-num">1 / 1</span><button data-action="next" title="下一页" aria-label="下一页"><i data-lucide="chevron-right"></i></button><span class="nav-sep"></span><button data-open-library title="参考资料" aria-label="参考资料"><i data-lucide="library-big"></i></button><button data-action="presenter" title="演讲者视图" aria-label="演讲者视图"><i data-lucide="presentation"></i></button><button data-action="print" title="打印或另存PDF" aria-label="打印或另存PDF"><i data-lucide="printer"></i></button><button data-action="full" title="全屏" aria-label="全屏"><i data-lucide="maximize"></i></button></nav>
-<dialog id="reference-dialog" aria-labelledby="reference-title">
-<div class="reference-header"><div><h2 id="reference-title">参考资料</h2><p id="reference-detail"></p></div><button id="reference-close" title="关闭资料" aria-label="关闭资料"><i data-lucide="x"></i></button></div>
-<div class="reference-workspace"><div class="reference-sidebar"><h3>资料目录</h3><div id="reference-list"></div><p id="reference-total"></p></div><div class="reference-reader"><div class="reference-tools"><button id="reference-full" class="text-command"><i data-lucide="book-open"></i>首页</button><button id="reference-cited" class="text-command"><i data-lucide="bookmark"></i>引用页</button><span class="reference-spacer"></span><a id="reference-external" target="_blank" rel="noopener noreferrer" title="原始网页" aria-label="原始网页"><i data-lucide="external-link"></i></a><a id="reference-new-tab" target="_blank" rel="noopener" title="在新窗口打开PDF" aria-label="在新窗口打开PDF"><i data-lucide="square-arrow-out-up-right"></i></a><a id="reference-download" title="下载PDF" aria-label="下载PDF"><i data-lucide="download"></i></a></div><div class="reference-pagination"><button id="reference-prev" title="PDF上一页" aria-label="PDF上一页"><i data-lucide="chevron-left"></i></button><input id="reference-page" type="number" min="1" step="1" value="1" aria-label="PDF页码"><span id="reference-pages"></span><button id="reference-next" title="PDF下一页" aria-label="PDF下一页"><i data-lucide="chevron-right"></i></button><span class="reference-spacer"></span><button id="reference-zoom-out" title="缩小PDF" aria-label="缩小PDF"><i data-lucide="minus"></i></button><span id="reference-zoom-label">100%</span><button id="reference-zoom-in" title="放大PDF" aria-label="放大PDF"><i data-lucide="plus"></i></button><button id="reference-fit" title="适合宽度" aria-label="适合宽度"><i data-lucide="move-horizontal"></i></button></div><div id="reference-viewport"><div id="reference-paper"></div></div><p id="reference-status" role="status"></p></div></div>
-</dialog>
-{{ATTACHMENTS}}
+<body class="{{MODE}}">
+<main id="report">{{PAGES}}</main>
+<nav id="toolbar" aria-label="报告控制">
+<button data-action="prev" title="上一页" aria-label="上一页"><i data-lucide="chevron-left"></i></button>
+<input id="page-input" type="number" min="1" value="1" aria-label="报告页码"><span id="page-total"></span>
+<button data-action="next" title="下一页" aria-label="下一页"><i data-lucide="chevron-right"></i></button>
+<button data-action="presenter" title="讲者台" aria-label="讲者台"><i data-lucide="presentation"></i></button>
+<button data-action="full" title="全屏" aria-label="全屏"><i data-lucide="maximize"></i></button>
+<button data-action="print" title="打印" aria-label="打印"><i data-lucide="printer"></i></button>
+</nav>
+<p id="report-error" role="alert" hidden></p>
+<script id="report-data" type="application/json">{{DATA}}</script>
 {{SCRIPTS}}
 </body>
 </html>
